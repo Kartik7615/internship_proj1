@@ -1,22 +1,59 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import Webcam from "react-webcam"
 import { createIdCard } from "@/app/actions/idcard"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { getIdCardById, updateIdCard } from "@/app/actions/idcard"
 
 export default function NewIdCardPage() {
   const router = useRouter()
   const webcamRef = useRef<Webcam>(null)
+  const searchParams = useSearchParams()
+  const editId = searchParams.get("edit")
 
   const [imgSrc, setImgSrc] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isFetching, setIsFetching] = useState(!!editId)
   const [error, setError] = useState("")
+
+  const [formDataState, setFormDataState] = useState({
+    name: "", mobileNo: "", address: "", area: "", state: "", constituency: "", membershipNo: "", qrIdNo: ""
+  })
+
+  useEffect(() => {
+    async function fetchRecord() {
+      if (editId) {
+        const record = await getIdCardById(editId)
+        if (record) {
+          setFormDataState({
+            name: record.name,
+            mobileNo: record.mobileNo,
+            address: record.address,
+            area: record.area,
+            state: record.state,
+            constituency: record.constituency,
+            membershipNo: record.membershipNo,
+            qrIdNo: record.qrIdNo // Or how you retrieve this from your schema
+          })
+          setImgSrc(record.photoUrl) // Pre-load existing image
+        } else {
+          setError("Record not found.")
+        }
+      }
+      setIsFetching(false)
+    }
+    fetchRecord()
+  }, [editId])
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot()
     if (imageSrc) setImgSrc(imageSrc)
   }, [webcamRef])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormDataState({ ...formDataState, [e.target.name]: e.target.value })
+  }
 
   const handleSubmit = async (formData: FormData) => {
     if (!imgSrc) {
@@ -25,16 +62,28 @@ export default function NewIdCardPage() {
     }
     setIsLoading(true)
     setError("")
-    formData.append("photoBase64", imgSrc)
-    const result = await createIdCard(formData)
+
+    if (imgSrc.startsWith("data:image")) {
+      formData.append("photoBase64", imgSrc)
+    }
+
+    let result;
+    if (editId) {
+      formData.append("id", editId)
+      result = await updateIdCard(formData)
+    } else {
+      result = await createIdCard(formData)
+    }
+
     if (result.success) {
       router.push("/idcards")
-      router.refresh()
     } else {
       setError(result.error || "Something went wrong.")
       setIsLoading(false)
     }
   }
+
+  if (isFetching) return <div style={{ padding: 40, fontFamily: 'monospace' }}>Loading record data...</div>
 
   return (
     <>
@@ -316,14 +365,15 @@ export default function NewIdCardPage() {
 
           <div className="newid-page-header">
             <p className="newid-eyebrow">Identification Office</p>
-            <h1 className="newid-title">Generate New ID Card</h1>
+            {/* Update the title based on whether we are editing or creating */}
+            <h1 className="newid-title">{editId ? "Edit ID Card" : "Generate New ID Card"}</h1>
           </div>
 
           {error && <div className="newid-error">{error}</div>}
 
           <div className="newid-grid">
 
-            {/* ── Camera panel ── */}
+            {/* ── Camera panel (Keep your existing camera panel here) ── */}
             <div className="newid-panel">
               <div className="newid-panel-header">Photograph Station</div>
               <div className="newid-panel-body">
@@ -367,43 +417,106 @@ export default function NewIdCardPage() {
 
                   <div className="newid-field">
                     <label htmlFor="name">Full Name</label>
-                    <input id="name" type="text" name="name" placeholder="e.g. John A. Smith" required />
+                    <input
+                      id="name"
+                      type="text"
+                      name="name"
+                      placeholder="e.g. John A. Smith"
+                      value={formDataState.name}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
 
                   <div className="newid-field">
                     <label htmlFor="mobileNo">Mobile No.</label>
-                    <input id="mobileNo" type="text" name="mobileNo" placeholder="+91 00000 00000" required />
+                    <input
+                      id="mobileNo"
+                      type="text"
+                      name="mobileNo"
+                      placeholder="+91 00000 00000"
+                      value={formDataState.mobileNo}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
 
                   <div className="newid-field">
                     <label htmlFor="address">Address</label>
-                    <textarea id="address" name="address" placeholder="Street, City, PIN" required />
+                    <textarea
+                      id="address"
+                      name="address"
+                      placeholder="Street, City, PIN"
+                      value={formDataState.address}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
 
                   <div className="newid-two-col">
                     <div className="newid-field">
                       <label htmlFor="area">Area</label>
-                      <input id="area" type="text" name="area" placeholder="Area" required />
+                      <input
+                        id="area"
+                        type="text"
+                        name="area"
+                        placeholder="Area"
+                        value={formDataState.area}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div className="newid-field">
                       <label htmlFor="state">State</label>
-                      <input id="state" type="text" name="state" placeholder="State" required />
+                      <input
+                        id="state"
+                        type="text"
+                        name="state"
+                        placeholder="State"
+                        value={formDataState.state}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                   </div>
 
                   <div className="newid-field">
                     <label htmlFor="constituency">Constituency</label>
-                    <input id="constituency" type="text" name="constituency" placeholder="Constituency" required />
+                    <input
+                      id="constituency"
+                      type="text"
+                      name="constituency"
+                      placeholder="Constituency"
+                      value={formDataState.constituency}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
 
                   <div className="newid-two-col">
                     <div className="newid-field">
                       <label htmlFor="membershipNo">Membership No.</label>
-                      <input id="membershipNo" type="text" name="membershipNo" placeholder="MBR-0001" required />
+                      <input
+                        id="membershipNo"
+                        type="text"
+                        name="membershipNo"
+                        placeholder="MBR-0001"
+                        value={formDataState.membershipNo}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div className="newid-field">
                       <label htmlFor="qrIdNo">QR ID No.</label>
-                      <input id="qrIdNo" type="text" name="qrIdNo" placeholder="QR-0001" required />
+                      <input
+                        id="qrIdNo"
+                        type="text"
+                        name="qrIdNo"
+                        placeholder="QR-0001"
+                        value={formDataState.qrIdNo}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                   </div>
 
@@ -413,7 +526,8 @@ export default function NewIdCardPage() {
                     {isLoading ? (
                       <><div className="spinner" /> Processing Record…</>
                     ) : (
-                      "Generate &amp; Save ID Card »"
+                      /* Dynamically change button text */
+                      editId ? "Save Changes »" : "Generate & Save ID Card »"
                     )}
                   </button>
 

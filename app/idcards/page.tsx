@@ -4,26 +4,56 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import PrintButton from "@/components/PrintButton"
 import Image from "next/image"
+import { deleteIdCardAction } from "../actions/idcard"
+import DeleteButton from "@/components/DeleteButton"
 
-export default async function IdCardsListPage() {
+export default async function IdCardsListPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ query?: string; page?: string }> 
+}) {
     const session = await auth()
     if (!session) redirect("/login")
 
-    const idCards = await prisma.idCard.findMany({
-        orderBy: { createdAt: "desc" },
-        include: {
-            qrCode: true,
-            createdBy: {
-                select: { name: true, email: true }
-            }
-        }
-    })
+    const resolvedParams = await searchParams
+    const query = resolvedParams?.query || ""
+    const currentPage = Number(resolvedParams?.page) || 1
+    
+    const ITEMS_PER_PAGE = 10
 
-    // Chunk the ID cards into groups of 3 for A4 pagination
-    const cardsPerPage = 3
+    const where = query
+        ? {
+              OR: [
+                  { name: { contains: query, mode: "insensitive" as const } },
+                  { membershipNo: { contains: query, mode: "insensitive" as const } },
+                  { mobileNo: { contains: query, mode: "insensitive" as const } },
+              ],
+          }
+        : {}
+    
+
+    const [idCards, totalCards] = await Promise.all([
+        prisma.idCard.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            skip: (currentPage - 1) * ITEMS_PER_PAGE,
+            take: ITEMS_PER_PAGE,
+            include: {
+                qrCode: true,
+                createdBy: {
+                    select: { name: true, email: true },
+                },
+            },
+        }),
+        prisma.idCard.count({ where }),
+    ])
+
+    const totalPages = Math.ceil(totalCards / ITEMS_PER_PAGE)
+
+    const cardsPerPagePrint = 3
     const chunkedIdCards = []
-    for (let i = 0; i < idCards.length; i += cardsPerPage) {
-        chunkedIdCards.push(idCards.slice(i, i + cardsPerPage))
+    for (let i = 0; i < idCards.length; i += cardsPerPagePrint) {
+        chunkedIdCards.push(idCards.slice(i, i + cardsPerPagePrint))
     }
 
     return (
@@ -70,6 +100,22 @@ export default async function IdCardsListPage() {
                 .rule-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
                 .rule-line { flex: 1; height: 1px; background: #b0a090; }
                 .rule-diamond { width: 5px; height: 5px; background: #3a2e22; transform: rotate(45deg); flex-shrink: 0; }
+
+                .search-bar { display: flex; gap: 8px; margin-bottom: 20px; }
+                .search-input { flex: 1; padding: 10px; font-family: 'Courier Prime', monospace; border: 2px solid #3a2e22; background: #fdf8f0; font-size: 13px; }
+                .search-btn { background: #3a2e22; color: #e8dfc8; border: 2px solid #3a2e22; padding: 0 16px; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; }
+                
+                .action-btns { display: flex; gap: 8px; }
+                .btn-edit { color: #3a2e22; text-decoration: none; font-weight: bold; border: 1px solid #3a2e22; padding: 4px 8px; font-size: 10px; text-transform: uppercase; background: #ede4d2; }
+                .btn-edit:hover { background: #3a2e22; color: #e8dfc8; }
+                .btn-delete { color: #8b2020; font-weight: bold; border: 1px solid #8b2020; padding: 4px 8px; font-size: 10px; text-transform: uppercase; background: transparent; cursor: pointer; }
+                .btn-delete:hover { background: #8b2020; color: #fff; }
+
+                .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 12px; }
+                .page-controls { display: flex; gap: 10px; }
+                .page-btn { padding: 6px 12px; border: 1px solid #3a2e22; background: transparent; color: #3a2e22; text-decoration: none; font-weight: bold; }
+                .page-btn[disabled] { opacity: 0.5; pointer-events: none; }
+                .page-btn:hover:not([disabled]) { background: #3a2e22; color: #e8dfc8; }
 
                 /* Hide Print Layout on Screen */
                 @media screen {
@@ -146,6 +192,17 @@ export default async function IdCardsListPage() {
             {/* MAIN SCREEN UI */}
             <div className="idlist-root no-print">
                 <div className="idlist-inner">
+                    <form method="GET" action="/idcards" className="search-bar">
+                        <input
+                            type="text"
+                            name="query"
+                            defaultValue={query}
+                            placeholder="Search by name, mobile, or membership no..."
+                            className="search-input"
+                        />
+                        <button type="submit" className="search-btn">Search</button>
+                        {query && <Link href="/idcards" className="page-btn">Clear</Link>}
+                    </form>
                     <div className="rule-row">
                         <div className="rule-line" /><div className="rule-diamond" /><div className="rule-line" />
                     </div>
@@ -166,7 +223,7 @@ export default async function IdCardsListPage() {
                     </div>
 
                     {/* Table */}
-                    {idCards.length > 0 ? (
+                    {idCards.length > 0 ? (<>
                         <div className="idlist-table-wrap">
                             <table className="idlist-table">
                                 <thead>
@@ -176,8 +233,7 @@ export default async function IdCardsListPage() {
                                         <th>Mobile</th>
                                         <th>Area / State</th>
                                         <th>Constituency</th>
-                                        <th>QR</th>
-                                        <th>Generated By</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -192,20 +248,46 @@ export default async function IdCardsListPage() {
                                             <td>{card.area}, {card.state}</td>
                                             <td>{card.constituency}</td>
                                             <td>
-                                                {card.qrCode ? (
-                                                    <img src={card.qrCode.qrImageUrl} alt="QR" className="row-qr" />
-                                                ) : <span style={{ color: "#b0a090", fontSize: 11 }}>—</span>}
+                                                <div className="action-btns">
+                                                    <Link href={`/idcards/new?edit=${card.id}`} className="btn-edit">Edit</Link>
+                                                    <DeleteButton id={card.id} />
+                                                </div>
                                             </td>
-                                            <td><span className="row-creator">{card.createdBy.name || card.createdBy.email}</span></td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+
+                        {totalPages > 1 && (
+                            <div className="pagination">
+                                <span>Page {currentPage} of {totalPages}</span>
+                                <div className="page-controls">
+                                    <Link
+                                        href={`/idcards?page=${currentPage - 1}${query ? `&query=${query}` : ''}`}
+                                        className="page-btn"
+                                        aria-disabled={currentPage <= 1}
+                                        tabIndex={currentPage <= 1 ? -1 : undefined}
+                                        style={currentPage <= 1 ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                                    >
+                                        « Prev
+                                    </Link>
+                                    <Link
+                                        href={`/idcards?page=${currentPage + 1}${query ? `&query=${query}` : ''}`}
+                                        className="page-btn"
+                                        aria-disabled={currentPage >= totalPages}
+                                        tabIndex={currentPage >= totalPages ? -1 : undefined}
+                                        style={currentPage >= totalPages ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                                    >
+                                        Next »
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
+                    </>
                     ) : (
                         <div className="idlist-empty">
-                            <p className="idlist-empty-title">No ID Cards on Record</p>
-                            <p className="idlist-empty-sub">Begin by generating your first identification card.</p>
+                            <p className="idlist-empty-title">No ID Cards Found</p>
                         </div>
                     )}
                 </div>
