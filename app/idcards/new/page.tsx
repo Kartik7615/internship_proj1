@@ -98,7 +98,7 @@ function NewIdCardForm() {
             transparent, transparent 27px,
             rgba(0,0,0,0.04) 27px, rgba(0,0,0,0.04) 28px
           );
-          padding: 40px 24px;
+          padding: 28px 18px;
           font-family: 'Courier Prime', 'Courier New', monospace;
         }
 
@@ -110,8 +110,8 @@ function NewIdCardForm() {
         /* ── Page heading ── */
         .newid-page-header {
           border-bottom: 2px solid #3a2e22;
-          padding-bottom: 14px;
-          margin-bottom: 28px;
+          padding-bottom: 12px;
+          margin-bottom: 24px;
         }
 
         .newid-eyebrow {
@@ -171,7 +171,7 @@ function NewIdCardForm() {
         }
 
         .newid-panel-body {
-          padding: 20px 20px 22px;
+          padding: 18px 18px 20px;
         }
 
         /* ── Webcam / photo ── */
@@ -208,6 +208,7 @@ function NewIdCardForm() {
           display: flex;
           gap: 10px;
           margin-top: 14px;
+          flex-wrap: wrap;
         }
 
         .btn-capture {

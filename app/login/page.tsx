@@ -67,7 +67,7 @@ export default function LoginPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 2rem;
+          padding: 1.5rem;
           font-family: 'Courier Prime', 'Courier New', monospace;
         }
 
@@ -110,7 +110,7 @@ export default function LoginPage() {
         }
 
         .card-body {
-          padding: 32px 32px 36px;
+          padding: 24px 22px 28px;
         }
 
         .masthead {
@@ -273,12 +273,28 @@ export default function LoginPage() {
 
         .card-footer {
           border-top: 1px solid #c8b89a;
-          padding: 12px 32px;
+          padding: 10px 22px;
           text-align: center;
           font-family: 'Courier Prime', monospace;
           font-size: 10px;
           color: #9a8a72;
           letter-spacing: 0.1em;
+        }
+
+        /* ── Mobile tweaks ── */
+        @media (max-width: 640px) {
+          .page-root {
+            padding: 1.25rem;
+          }
+          .card {
+            max-width: 360px;
+          }
+          .card-body {
+            padding: 20px 18px 24px;
+          }
+          .masthead h1 {
+            font-size: 22px;
+          }
         }
       `}</style>
 

@@ -5,9 +5,9 @@ export default async function EmployeeDashboard() {
   const user = session?.user as any
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-2xl">
-        <div className="flex items-center justify-between rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-white p-5 sm:p-6 shadow-sm ring-1 ring-gray-200">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               Welcome, {user?.name || "Employee"}!
@@ -34,7 +34,7 @@ export default async function EmployeeDashboard() {
           </form>
         </div>
 
-        <div className="mt-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+        <div className="mt-6 sm:mt-8 rounded-xl bg-white p-5 sm:p-6 shadow-sm ring-1 ring-gray-200">
           <h2 className="text-lg font-semibold text-gray-800">Your Tasks</h2>
           <p className="mt-2 text-sm text-gray-500">
             This is where you can display employee-specific data from your PostgreSQL database later!

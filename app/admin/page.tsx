@@ -37,7 +37,7 @@ export default function AdminDashboard() {
             transparent, transparent 27px,
             rgba(0,0,0,0.04) 27px, rgba(0,0,0,0.04) 28px
           );
-          padding: 40px 24px;
+          padding: 28px 18px;
           font-family: 'Courier Prime', 'Courier New', monospace;
         }
 
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
         }
 
         .admin-card-body {
-          padding: 26px 28px 30px;
+          padding: 22px 22px 26px;
         }
 
         /* ── Messages ── */
@@ -253,11 +253,27 @@ export default function AdminDashboard() {
         /* ── Footer note ── */
         .admin-card-footer {
           border-top: 1px solid #c8b89a;
-          padding: 11px 28px;
+          padding: 10px 22px;
           font-size: 10px;
           color: #9a8a72;
           letter-spacing: 0.08em;
           font-style: italic;
+        }
+
+        /* ── Mobile tweaks ── */
+        @media (max-width: 640px) {
+          .admin-root {
+            padding: 20px 12px;
+          }
+          .admin-inner {
+            max-width: 100%;
+          }
+          .admin-title {
+            font-size: 22px;
+          }
+          .admin-card-body {
+            padding: 18px 16px 22px;
+          }
         }
 
         .rule-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }

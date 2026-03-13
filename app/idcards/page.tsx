@@ -106,11 +106,11 @@ export default async function IdCardsListPage({
                         rgba(0,0,0,0.04) 27px,
                         rgba(0,0,0,0.04) 28px
                     );
-                    padding: 40px 24px;
+                    padding: 24px 16px;
                     font-family: 'Courier Prime', 'Courier New', monospace;
                 }
                 .idlist-inner { max-width: 960px; margin: 0 auto; }
-                .idlist-header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid #3a2e22; padding-bottom: 16px; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+                .idlist-header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid #3a2e22; padding-bottom: 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
                 .idlist-eyebrow { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #7a6a52; margin-bottom: 4px; }
                 .idlist-title { font-family: 'IM Fell English', Georgia, serif; font-size: 28px; color: #1e1710; line-height: 1.1; }
                 .idlist-count { font-size: 11px; color: #7a6a52; margin-top: 4px; letter-spacing: 0.08em; }
@@ -123,7 +123,7 @@ export default async function IdCardsListPage({
                 .idlist-table thead th { padding: 11px 14px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #c8b89a; white-space: nowrap; }
                 .idlist-table tbody tr { border-bottom: 1px solid #d4c9b4; }
                 .idlist-table tbody tr:hover { background-color: #ece4d4; }
-                .idlist-table tbody td { padding: 11px 14px; color: #2a1e12; vertical-align: middle; }
+                .idlist-table tbody td { padding: 10px 10px; color: #2a1e12; vertical-align: middle; }
                 .row-photo { width: 40px; height: 40px; object-fit: cover; border: 1px solid #3a2e22; display: block; }
                 .row-name { font-family: 'IM Fell English', Georgia, serif; font-size: 15px; color: #1e1710; }
                 .row-membership { font-size: 11px; color: #7a6a52; letter-spacing: 0.06em; margin-top: 1px; }
@@ -154,6 +154,55 @@ export default async function IdCardsListPage({
                 /* Hide Print Layout on Screen */
                 @media screen {
                     .print-layout { display: none; }
+                }
+
+                /* ── Mobile adjustments ── */
+                @media (max-width: 640px) {
+                    .idlist-root {
+                        padding: 16px 10px;
+                    }
+                    .idlist-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 8px;
+                    }
+                    .header-actions {
+                        width: 100%;
+                        justify-content: flex-start;
+                        flex-wrap: wrap;
+                    }
+                    .idlist-title {
+                        font-size: 22px;
+                    }
+                    .idlist-table-wrap {
+                        border-width: 1px;
+                        box-shadow: 3px 3px 0 #3a2e22;
+                    }
+                    table.idlist-table {
+                        font-size: 11px;
+                    }
+                    .idlist-table thead th {
+                        padding: 8px 6px;
+                        font-size: 9px;
+                    }
+                    .idlist-table tbody td {
+                        padding: 8px 6px;
+                    }
+                    .row-photo {
+                        width: 32px;
+                        height: 32px;
+                    }
+                    .row-name {
+                        font-size: 13px;
+                    }
+                    .row-membership {
+                        font-size: 10px;
+                    }
+                    .pagination {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 8px;
+                    }
                 }
 
                 /* ── Print Layout Styles ── */
