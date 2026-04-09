@@ -31,24 +31,56 @@ export default async function IdCardsListPage({
     let totalCards = 0
 
     if (hasDatabase) {
-        const [realIdCards, realTotalCards] = (await Promise.all([
-            prisma.idCard.findMany({
-                where,
-                orderBy: { membershipNo: "asc" },
-                skip: (currentPage - 1) * ITEMS_PER_PAGE,
-                take: ITEMS_PER_PAGE,
-                include: {
-                    qrCode: true,
-                    createdBy: {
-                        select: { name: true, email: true },
+        try {
+            const [realIdCards, realTotalCards] = (await Promise.all([
+                prisma.idCard.findMany({
+                    where,
+                    orderBy: { membershipNo: "asc" },
+                    skip: (currentPage - 1) * ITEMS_PER_PAGE,
+                    take: ITEMS_PER_PAGE,
+                    include: {
+                        qrCode: true,
+                        createdBy: {
+                            select: { name: true, email: true },
+                        },
                     },
-                },
-            }),
-            prisma.idCard.count({ where }),
-        ])) as [any[], number]
+                }),
+                prisma.idCard.count({ where }),
+            ])) as [any[], number]
 
-        idCards = realIdCards
-        totalCards = realTotalCards
+            idCards = realIdCards
+            totalCards = realTotalCards
+        } catch (error) {
+            // Local/dev fallback: if DB URL exists but connection fails, render sample data.
+            console.error("Failed to fetch ID cards from DB, using fallback data:", error)
+            idCards = [
+                {
+                    id: "sample-1",
+                    name: "Sample Member One",
+                    address: "Sample Street 1",
+                    area: "Sample Area",
+                    mobileNo: "9999999999",
+                    state: "Sample State",
+                    constituency: "Belagavi dakshin",
+                    membershipNo: "1001",
+                    photoUrl: "/Id_Card_Format/card-front.png",
+                    qrCode: null,
+                },
+                {
+                    id: "sample-2",
+                    name: "Sample Member Two",
+                    address: "Sample Street 2",
+                    area: "Sample Area",
+                    mobileNo: "8888888888",
+                    state: "Sample State",
+                    constituency: "Belagavi dakshin",
+                    membershipNo: "1002",
+                    photoUrl: "/Id_Card_Format/card-front.png",
+                    qrCode: null,
+                },
+            ]
+            totalCards = idCards.length
+        }
     } else {
         idCards = [
             {

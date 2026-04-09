@@ -105,6 +105,7 @@ export default function IdCardsClient({
                 .row-photo { width: 40px; height: 40px; object-fit: cover; border: 1px solid #3a2e22; display: block; }
                 .row-name { font-family: 'IM Fell English', Georgia, serif; font-size: 15px; color: #1e1710; }
                 .row-membership { font-size: 11px; color: #7a6a52; letter-spacing: 0.06em; margin-top: 1px; }
+                .row-designation { font-size: 10px; color: #5a4a32; margin-top: 2px; font-style: italic; }
                 .row-badge { display: inline-block; border: 1px solid #8a7a62; padding: 2px 7px; font-size: 10px; letter-spacing: 0.1em; color: #5a4a32; background-color: #ede4d2; text-transform: uppercase; }
                 .row-qr { width: 36px; height: 36px; border: 1px solid #b0a090; padding: 2px; background: #fff; }
                 .row-creator { font-size: 11px; color: #7a6a52; font-style: italic; }
@@ -147,6 +148,7 @@ export default function IdCardsClient({
                     .row-photo { width: 32px; height: 32px; }
                     .row-name { font-size: 13px; }
                     .row-membership { font-size: 10px; }
+                    .row-designation { font-size: 9px; }
                     .pagination { flex-direction: column; align-items: flex-start; gap: 8px; }
                     .limit-select { width: 100%; }
                 }
@@ -169,10 +171,12 @@ export default function IdCardsClient({
                     .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
 
                     .val-name { position: absolute; top: 57%; left: 32.5%; font-size: 12px; font-weight: bold; color: #4B0082; z-index: 10; }
+                    .val-designation { position: absolute; top: 69%; left: 32.5%; font-size: 10px; font-weight: 600; color: #4B0082; z-index: 10; }
                     .val-member { position: absolute; top: 80.5%; left: 45%; font-size: 11px; font-weight: bold; color: #000; z-index: 10; }
                     .val-photo { position: absolute; top: 35.5%; left: 69.8%; width: 26%; height: 57.5%; object-fit: cover; z-index: 10; border: 1px solid #3a2e22; box-sizing: border-box; }
 
                     .val-b-name { position: absolute; top: 62.5%; left: 24%; font-size: 11px; font-weight: bold; color: #4B0082; z-index: 10; }
+                    .val-b-designation { position: absolute; top: 66.8%; left: 24%; font-size: 9px; color: #4B0082; z-index: 10; }
                     .val-b-address { position: absolute; top: 70%; left: 24%; font-size: 10px; color: #00000; width: 50%; line-height: 1.2; word-wrap: break-word; z-index: 10; }
                     .val-qr { position: absolute; top: 58%; right: 4%; width: 20%; aspect-ratio: 1; background: #fff; padding: 2px; border-radius: 4px; z-index: 10; }
                 }
@@ -246,6 +250,7 @@ export default function IdCardsClient({
                                         <th>S.No.</th>
                                         <th>Photo</th>
                                         <th>Name &amp; Membership</th>
+                                        <th>Designation</th>
                                         <th>Mobile</th>
                                         <th>Area / State</th>
                                         <th>Constituency</th>
@@ -271,7 +276,9 @@ export default function IdCardsClient({
                                             <td>
                                                 <div className="row-name">{card.name}</div>
                                                 <div className="row-membership"><span className="row-badge">{card.membershipNo}</span></div>
+                                                {card.designation && <div className="row-designation">{card.designation}</div>}
                                             </td>
+                                            <td>{card.designation || "-"}</td>
                                             <td>{card.mobileNo}</td>
                                             <td>{card.area}, {card.state}</td>
                                             <td>{card.constituency}</td>
@@ -350,6 +357,7 @@ export default function IdCardsClient({
                                         </span>
 
                                         <span className="val-name">{card.name}</span>
+                                        {card.designation && <span className="val-designation">{card.designation}</span>}
                                         <span className="val-member">{card.membershipNo}</span>
                                         <img src={card.photoUrl} className="val-photo" alt="" />
                                     </div>
@@ -359,6 +367,7 @@ export default function IdCardsClient({
                                         <img src="/Id_Card_Format/card-back.png" className="card-bg" alt="" />
 
                                         <span className="val-b-name">{card.name}</span>
+                                        {card.designation && <span className="val-b-designation">{card.designation}</span>}
                                         <span className="val-b-address">
                                             {card.address}, {card.area}, {card.state}
                                         </span>
