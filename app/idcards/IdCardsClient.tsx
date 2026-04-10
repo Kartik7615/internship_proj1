@@ -25,6 +25,8 @@ export default function IdCardsClient({
     const searchParams = useSearchParams()
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+    const [showPrintChoice, setShowPrintChoice] = useState(false)
+    const [printWithDesignation, setPrintWithDesignation] = useState(false)
 
     const toggleSelect = (id: string) => {
         const newSet = new Set(selectedIds)
@@ -63,7 +65,14 @@ export default function IdCardsClient({
     }
 
     const handlePrint = () => {
-        window.print()
+        setShowPrintChoice(true)
+    }
+
+    const handlePrintChoice = (withDesignation: boolean) => {
+        setPrintWithDesignation(withDesignation)
+        setShowPrintChoice(false)
+        // Ensure state is applied before opening print preview.
+        setTimeout(() => window.print(), 0)
     }
 
     return (
@@ -93,6 +102,58 @@ export default function IdCardsClient({
                 .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
                 .idlist-create-btn { background-color: #3a2e22; color: #e8dfc8; border: 2px solid #3a2e22; padding: 9px 18px; font-family: 'Courier Prime', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: background-color 0.15s, box-shadow 0.15s, transform 0.1s; white-space: nowrap; }
                 .idlist-create-btn:hover { background-color: #1e1710; box-shadow: 3px 3px 0 #1e1710; transform: translate(-1px, -1px); }
+                .print-choice-backdrop {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.45);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    padding: 16px;
+                }
+                .print-choice-modal {
+                    width: 100%;
+                    max-width: 420px;
+                    background: #f5efe4;
+                    border: 2px solid #3a2e22;
+                    box-shadow: 6px 6px 0 #3a2e22;
+                    padding: 16px;
+                }
+                .print-choice-title {
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    color: #3a2e22;
+                    margin-bottom: 8px;
+                }
+                .print-choice-subtitle {
+                    font-size: 12px;
+                    color: #5a4a32;
+                    margin-bottom: 14px;
+                }
+                .print-choice-actions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+                .print-choice-btn {
+                    border: 2px solid #3a2e22;
+                    padding: 8px 10px;
+                    font-size: 10px;
+                    font-weight: 700;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    cursor: pointer;
+                    font-family: 'Courier Prime', monospace;
+                    background: #3a2e22;
+                    color: #e8dfc8;
+                }
+                .print-choice-btn.secondary {
+                    background: transparent;
+                    color: #3a2e22;
+                }
                 .idlist-table-wrap { background-color: #f5efe4; border: 2px solid #3a2e22; box-shadow: 5px 5px 0 #3a2e22; overflow-x: auto; margin-bottom: 20px; }
                 table.idlist-table { width: 100%; border-collapse: collapse; font-family: 'Courier Prime', monospace; font-size: 13px; }
                 .idlist-table thead { background-color: #3a2e22; }
@@ -175,15 +236,87 @@ export default function IdCardsClient({
                     .val-member { position: absolute; top: 80.5%; left: 45%; font-size: 11px; font-weight: bold; color: #000; z-index: 10; }
                     .val-photo { position: absolute; top: 35.5%; left: 69.8%; width: 26%; height: 57.5%; object-fit: cover; z-index: 10; border: 1px solid #3a2e22; box-sizing: border-box; }
 
-                    .val-b-name { position: absolute; top: 62.5%; left: 24%; font-size: 11px; font-weight: bold; color: #4B0082; z-index: 10; }
-                    .val-b-designation { position: absolute; top: 66.8%; left: 24%; font-size: 9px; color: #4B0082; z-index: 10; }
-                    .val-b-address { position: absolute; top: 70%; left: 24%; font-size: 10px; color: #00000; width: 50%; line-height: 1.2; word-wrap: break-word; z-index: 10; }
+                    .val-b-name { position: absolute; top: 60.5%; left: 24%; font-size: 11px; font-weight: 700; color: #4B0082; z-index: 10; }
+                    .val-b-designation {
+                        position: absolute;
+                        top: 66.2%;
+                        left: 24%;
+                        width: 50%;
+                        font-size: 9px;
+                        color: #2a1e12;
+                        z-index: 10;
+                        display: flex;
+                        gap: 3px;
+                        align-items: baseline;
+                    }
+                    .val-b-designation-label {
+                        font-weight: 700;
+                        color: #4B0082;
+                    }
+                    .val-b-address {
+                        position: absolute;
+                        top: 70.4%;
+                        left: 24%;
+                        width: 50%;
+                        font-size: 9.5px;
+                        color: #1f1a14;
+                        line-height: 1.2;
+                        white-space: pre-line;
+                        z-index: 10;
+                        display: flex;
+                        gap: 6px;
+                        align-items: flex-start;
+                    }
+                    .val-b-address.with-designation { top: 74.4%; }
+                    .val-b-address-label {
+                        min-width: 36px;
+                        font-weight: 700;
+                        color: #2a1e12;
+                    }
+                    .val-b-address-text {
+                        flex: 1;
+                        word-wrap: break-word;
+                    }
                     .val-qr { position: absolute; top: 58%; right: 4%; width: 20%; aspect-ratio: 1; background: #fff; padding: 2px; border-radius: 4px; z-index: 10; }
                 }
             `}</style>
 
             <div className="idlist-root no-print">
                 <div className="idlist-inner">
+                    {showPrintChoice && (
+                        <div className="print-choice-backdrop">
+                            <div className="print-choice-modal">
+                                <p className="print-choice-title">Print Preference</p>
+                                <p className="print-choice-subtitle">
+                                    Print ID cards with designation or without designation?
+                                </p>
+                                <div className="print-choice-actions">
+                                    <button
+                                        type="button"
+                                        className="print-choice-btn"
+                                        onClick={() => handlePrintChoice(true)}
+                                    >
+                                        With Designation
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="print-choice-btn secondary"
+                                        onClick={() => handlePrintChoice(false)}
+                                    >
+                                        Without Designation
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="print-choice-btn secondary"
+                                        onClick={() => setShowPrintChoice(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <form method="GET" action="/idcards" className="search-bar">
                         <input
                             type="text"
@@ -357,7 +490,7 @@ export default function IdCardsClient({
                                         </span>
 
                                         <span className="val-name">{card.name}</span>
-                                        {card.designation && <span className="val-designation">{card.designation}</span>}
+                                        {printWithDesignation && card.designation && <span className="val-designation">{card.designation}</span>}
                                         <span className="val-member">{card.membershipNo}</span>
                                         <img src={card.photoUrl} className="val-photo" alt="" />
                                     </div>
@@ -367,9 +500,15 @@ export default function IdCardsClient({
                                         <img src="/Id_Card_Format/card-back.png" className="card-bg" alt="" />
 
                                         <span className="val-b-name">{card.name}</span>
-                                        {card.designation && <span className="val-b-designation">{card.designation}</span>}
-                                        <span className="val-b-address">
-                                            {card.address}, {card.area}, {card.state}
+                                        {printWithDesignation && (
+                                            <span className="val-b-designation">
+                                                <span className="val-b-designation-label">Designation:</span>
+                                                <span>{card.designation || "-"}</span>
+                                            </span>
+                                        )}
+                                        <span className={`val-b-address ${printWithDesignation ? "with-designation" : ""}`}>
+                                            <span className="val-b-address-label">Address</span>
+                                            <span className="val-b-address-text">{`${card.address}, ${card.area}, ${card.state}`}</span>
                                         </span>
                                         {card.qrCode && (
                                             <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" />
